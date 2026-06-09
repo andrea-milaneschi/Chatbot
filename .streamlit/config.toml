@@ -1,0 +1,5 @@
+[server]
+headless = false
+
+[auth]
+enabled = false
