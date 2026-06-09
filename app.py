@@ -1,6 +1,7 @@
 import io
 import os
 import pandas as pd
+
 import streamlit as st
 
 st.set_page_config(page_title="Consegne", page_icon="📦", layout="centered")
@@ -66,8 +67,20 @@ st.title("📦 Controllo Date di Consegna")
 # Caricamento dati
 df = load_local()
 if df is None:
-    st.error(f"Impossibile leggere i file Excel dalla cartella:\n{LOCAL_FOLDER}")
-    st.stop()
+    # Siamo su cloud: chiedi di caricare i file
+    st.info("Carica i file Excel aggiornati per avviare la ricerca.")
+    uploaded = st.file_uploader(
+        "Seleziona i file .xls dal tuo PC",
+        type=["xls", "xlsx"],
+        accept_multiple_files=True,
+    )
+    if not uploaded:
+        st.stop()
+    dfs = []
+    for f in uploaded:
+        dfs.append(pd.read_excel(io.BytesIO(f.read()), header=1))
+    df = pd.concat(dfs, ignore_index=True)
+
 st.caption(f"Database caricato — {len(df)} record totali.")
 
 st.divider()
